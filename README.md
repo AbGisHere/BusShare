@@ -1,55 +1,109 @@
-# Bus Share v2.0 — 3D City UI
+# Bus-Share v3.0
 
-A real-time bus tracking and booking platform with a **3D city map** rendered by React Three Fiber. Animated buses drive across a procedurally generated city grid; all dashboards float as HTML panels on top of the canvas.
+A real-time campus bus booking platform. Passengers book ₹20 rides and get a QR ticket. Drivers broadcast GPS, scan tickets via camera, and get verbal confirmation. Admins manage users, buses, and routes.
 
-![Bus Share 3D City UI](https://img.shields.io/badge/React-19-blue) ![Three.js](https://img.shields.io/badge/Three.js-0.183-orange) ![TypeScript](https://img.shields.io/badge/TypeScript-4.9-blue) ![License](https://img.shields.io/badge/license-MIT-green)
-
----
-
-## What's New in v2.0
-
-- **3D City Scene** — procedural 10×10 road grid, ~300 emissive buildings, city fog
-- **Animated Bus Models** — BoxGeometry buses smoothly lerp to their GPS positions each frame
-- **React Three Fiber** (`@react-three/fiber` + `@react-three/drei`) for all 3D rendering
-- **Socket.io live sync** — location updates merge in real-time without polling lag
-- **Landing particle field** — 800 rotating star points
-- **Driver bus highlight** — pulsing torus ring around your own bus
-- **Admin 3D bar chart** — live stats visualized in the city scene
-- HTML panels use `position: absolute` with `backdrop-filter: blur(12px)` for a glassmorphism look
+![React](https://img.shields.io/badge/React-19-blue) ![TypeScript](https://img.shields.io/badge/TypeScript-4.9-blue) ![Three.js](https://img.shields.io/badge/Three.js-decorative-orange) ![Node.js](https://img.shields.io/badge/Node.js-Express-green) ![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
 
-## Tech Stack
+## Features
 
-### Frontend (v2.0)
-| Layer | Library |
-|---|---|
-| UI framework | React 19 + TypeScript |
-| 3D engine | Three.js 0.183 |
-| React 3D reconciler | @react-three/fiber 9 |
-| 3D helpers | @react-three/drei (OrbitControls, Html, Float) |
-| Routing | React Router v7 |
-| HTTP client | Axios |
-| Real-time | Socket.io-client |
+**Passenger**
+- Live bus cards — see all active buses, their routes and stops
+- Pay ₹20 via mock Razorpay checkout → get QR ticket instantly
+- Active ticket always visible on dashboard
 
-### Backend (unchanged)
-| Layer | Library |
-|---|---|
-| Runtime | Node.js + TypeScript |
-| HTTP server | Express.js (port **5001**) |
-| Database | SQLite (via better-sqlite3) |
-| Real-time | Socket.io |
-| Auth | OTP via phone number |
-| Tickets | QRCode |
+**Driver**
+- Pick route when starting shift
+- GPS auto-broadcasts to all connected clients via Socket.io
+- Camera QR scanner (html5-qrcode) with instant valid/invalid overlay
+- Optional verbal TTS confirmation on scan
+- Today's scan count and revenue at a glance
+
+**Admin**
+- System stats (users, buses, bookings, revenue)
+- Create/manage users (drivers & admins)
+- Create buses and assign drivers
+- Create/delete routes with custom stops
+
+**General**
+- OTP phone login — no passwords
+- Passengers self-register; drivers/admins created by admin
+- Decorative 3D hero scene (React Three Fiber) on landing/login pages
 
 ---
 
-## Color Scheme
+## Stack
 
-| Token | Value | Usage |
-|---|---|---|
-| Primary | `#01161E` | Background, panels, fog |
-| Secondary | `#84A98C` | Accents, bus bodies, labels |
+| Layer | Tech |
+|-------|------|
+| Frontend | React 19, TypeScript 4.9, React Router v7 |
+| 3D | React Three Fiber, @react-three/drei, Three.js 0.183 |
+| QR scanning | html5-qrcode (camera), qrcode (server-side generation) |
+| Real-time | Socket.io v4 |
+| Backend | Node.js, Express 5, TypeScript 5 |
+| Database | SQLite (sqlite3) |
+| Auth | JWT (jsonwebtoken), OTP via in-memory |
+
+---
+
+## Getting Started
+
+### Prerequisites
+- Node.js 18+
+- npm
+
+### 1. Clone
+
+```bash
+git clone <repo-url>
+cd Bus-Share
+```
+
+### 2. Backend
+
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+Backend runs on **http://localhost:5001**
+
+On first start, an admin account is seeded automatically:
+- Phone: `+919999999999`
+
+### 3. Frontend
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+Frontend runs on **http://localhost:3000**
+
+---
+
+## Usage
+
+### First-time setup (Admin)
+1. Login at `http://localhost:3000/login?role=admin` with phone `+919999999999`
+2. Go to **Admin Dashboard → Users** → create driver accounts
+3. Go to **Buses** → create buses and assign drivers
+4. Go to **Routes** → create routes with comma-separated stops
+
+### Driver workflow
+1. Login at `/login?role=driver`
+2. Select route → Start Shift
+3. GPS auto-broadcasts from your browser
+4. Tap "Scan QR Ticket" to validate passengers boarding
+
+### Passenger workflow
+1. Register at `/register` or login at `/login?role=passenger`
+2. See live bus cards on dashboard
+3. Click "Book — ₹20" on any bus → complete mock Razorpay payment
+4. Show QR code to driver when boarding
 
 ---
 
@@ -57,151 +111,33 @@ A real-time bus tracking and booking platform with a **3D city map** rendered by
 
 ```
 Bus-Share/
-├── backend/               Node.js/Express API server
+├── backend/
 │   └── src/
-│       ├── routes/        Auth, bus, wallet, booking, admin
-│       └── db/            SQLite setup
-└── frontend/              React 19 + R3F app
+│       ├── db/index.ts          — SQLite schema & init
+│       ├── middleware/auth.ts   — JWT Bearer middleware
+│       ├── routes/
+│       │   ├── auth.ts          — OTP send/verify, register
+│       │   ├── passenger.ts     — Buses, wallet, bookings
+│       │   ├── driver.ts        — Bus control, GPS, QR scan
+│       │   └── admin.ts         — User/bus/route CRUD
+│       ├── socket.ts            — Socket.io instance
+│       └── index.ts             — Express + Socket.io server
+└── frontend/
     └── src/
-        ├── types/         Shared TS interfaces
-        ├── constants/     Color tokens, city grid bounds
-        ├── utils/         GPS → 3D coord transform
-        ├── api/           Axios client + all API calls
-        ├── hooks/         useSocket, useBuses, useWallet
-        ├── scene/         3D scene primitives (Building, BusModel, etc.)
+        ├── api/client.ts        — Axios + all API functions
+        ├── hooks/               — useAuth, useSocket
+        ├── scene/HeroScene.tsx  — Decorative 3D landing scene
         ├── components/
-        │   ├── Landing/         Auth overlay + modals
-        │   ├── PassengerDashboard/
-        │   ├── DriverDashboard/
-        │   ├── AdminDashboard/
-        │   └── shared/          NavBar, LoadingScene, ErrorBoundary
-        └── pages/         LandingPage, PassengerPage, DriverPage, AdminPage
+        │   ├── passenger/       — BusCard, WalletCard, PaymentModal, QRTicket
+        │   ├── driver/          — RouteSelector, GPSBroadcaster, QRScanner, ActiveRide
+        │   ├── admin/           — UsersPanel, BusesPanel, RoutesPanel
+        │   └── shared/          — NavBar, ProtectedRoute
+        └── pages/               — LandingPage, LoginPage, RegisterPage,
+                                   PassengerDashboard, DriverDashboard, AdminDashboard
 ```
-
----
-
-## Quick Start
-
-### Prerequisites
-- Node.js v18+
-- npm v9+
-
-### 1. Install all dependencies
-```bash
-npm run install-deps
-```
-
-### 2. Start backend + frontend simultaneously
-```bash
-npm run dev
-```
-
-- Backend: `http://localhost:5001`
-- Frontend: `http://localhost:3000`
-
-### Manual startup
-
-```bash
-# Terminal 1 — backend
-cd backend && npm run dev
-
-# Terminal 2 — frontend
-cd frontend && npm start
-```
-
----
-
-## User Roles
-
-### Passenger
-1. Open `http://localhost:3000` → Try Demo or Sign Up
-2. Verify phone OTP to log in
-3. The 3D city map loads with live buses
-4. **Click any bus** to open the booking panel
-5. Enter a seat number (1–30) → receive a QR code ticket valid 15 minutes
-6. Tap **Wallet** in the nav bar to add money
-
-### Driver
-1. Admin creates a driver account and assigns a bus
-2. Driver logs in → assigned bus is highlighted with a pulsing ring
-3. Tap **Location** → Update Location (simulates GPS)
-4. Tap **Scan QR** → paste passenger QR data → Validate
-5. Tap **Passengers** to see boarded passengers; **Stats** for revenue
-
-### Admin
-1. Log in with admin credentials
-2. Stat bar at top shows live system totals; 3D bar chart in the city
-3. Nav tabs: **Users**, **Drivers** (assign buses), **Buses**, **Routes**
-4. Create tabs: **+ User**, **+ Bus**, **+ Route**
-
----
-
-## API Reference
-
-### Auth
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/auth/register` | Register user (name, phoneNumber, role) |
-| POST | `/api/otp/send` | Send OTP to phone number |
-| POST | `/api/otp/verify` | Verify OTP → returns JWT + user |
-
-### Buses
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/bus/all` | All buses with GPS |
-| GET | `/api/bus/driver/:driverId` | Driver's assigned bus |
-| POST | `/api/bus/location/update` | Update bus GPS |
-
-### Wallet
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/wallet/balance/:userId` | Get balance |
-| POST | `/api/wallet/add` | Add money |
-
-### Bookings
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/booking/create` | Create booking → returns QR code |
-| POST | `/api/booking/validate` | Validate QR (driver scan) |
-| GET | `/api/booking/driver/:driverId` | Driver's passengers + stats |
-
-### Admin
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/admin/users` | All users |
-| GET | `/api/admin/buses` | All buses |
-| GET | `/api/admin/stats` | System statistics |
-| GET | `/api/admin/routes` | All routes |
-| POST | `/api/admin/create-user` | Create driver/admin |
-| POST | `/api/admin/create-bus` | Create bus |
-| POST | `/api/admin/create-route` | Create route |
-| POST | `/api/admin/assign-bus` | Assign bus to driver |
-| POST | `/api/admin/remove-bus-assignment` | Unassign bus |
-
----
-
-## Database Schema
-
-| Table | Key Columns |
-|---|---|
-| `users` | id, name, phone_number, role, created_at |
-| `wallets` | id, user_id, balance |
-| `buses` | id, bus_number, driver_id, current_lat, current_lng, last_updated |
-| `bookings` | id, user_id, bus_id, seat_number, qr_code, qr_expires_at, is_scanned |
-| `routes` | id, route_name, start_point, end_point, stops (JSON), total_distance, estimated_time |
-
----
-
-## Architecture Notes
-
-- `useFrame` / `useThree` are used only inside Canvas children — never in plain hooks
-- Canvas gets `pointerEvents: none` when any panel is open (prevents OrbitControls conflict)
-- All interactive forms use `position: absolute` DOM divs — not `<Html>` (which has input focus issues)
-- `@types/three` is pinned to `0.155.x` for TypeScript 4.9 compatibility
-- GPS coords cluster near 40.71/–74.00 (NYC); `latLngToXZ()` maps this ±0.045° range to ±45 world units
 
 ---
 
 ## License
 
-MIT © 2024 Bus Share Contributors
+MIT — see [LICENSE](./LICENSE)

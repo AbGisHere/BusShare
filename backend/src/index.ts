@@ -1,63 +1,105 @@
 import express from 'express';
+import http from 'http';
 import cors from 'cors';
-import { createServer } from 'http';
 import { Server } from 'socket.io';
-import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
+
+import { initDB, getDB } from './db';
+import { setIO, getIO } from './socket';
 import authRoutes from './routes/auth';
-import busRoutes from './routes/bus';
-import walletRoutes from './routes/wallet';
-import bookingRoutes from './routes/booking';
+import passengerRoutes from './routes/passenger';
+import driverRoutes from './routes/driver';
 import adminRoutes from './routes/admin';
-import otpRoutes from './routes/otp';
-import { initializeDatabase } from './models/database';
+
+// Re-export getIO so any module can import it from here if needed
+export { getIO };
 
 const app = express();
-const server = createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:3000",
-    methods: ["GET", "POST"]
-  }
-});
+const server = http.createServer(app);
 
-const PORT = process.env.PORT || 5001;
-
-app.use(cors());
+// ---------- Express middleware ----------
+app.use(
+  cors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  })
+);
 app.use(express.json());
 
+// ---------- Routes ----------
 app.use('/api/auth', authRoutes);
-app.use('/api/bus', busRoutes);
-app.use('/api/wallet', walletRoutes);
-app.use('/api/booking', bookingRoutes);
+app.use('/api/passenger', passengerRoutes);
+app.use('/api/driver', driverRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/otp', otpRoutes);
 
-io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
-
-  socket.on('driver-location-update', (data) => {
-    socket.broadcast.emit('bus-location-update', data);
-  });
-
-  socket.on('qr-scan', (data) => {
-    socket.broadcast.emit('qr-validated', data);
-  });
-
-  socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
-  });
+// Health check
+app.get('/health', (_req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-const startServer = async () => {
-  try {
-    await initializeDatabase();
-    server.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-  } catch (error) {
-    console.error('Failed to start server:', error);
+// ---------- Seed admin ----------
+const seedAdmin = async () => {
+  const db = getDB();
+  const adminPhone = '+919999999999';
+
+  const existing = await db.get('SELECT id FROM users WHERE phone = ?', [adminPhone]);
+  if (!existing) {
+    const result = await db.run(
+      "INSERT INTO users (name, phone, role) VALUES ('Admin', ?, 'admin')",
+      [adminPhone]
+    );
+    await db.run('INSERT INTO wallets (user_id, balance) VALUES (?, 0)', [result.lastID]);
+    console.log(`🔑  Admin seeded — phone: ${adminPhone}`);
+  } else {
+    console.log(`ℹ️   Admin already exists — phone: ${adminPhone}`);
   }
 };
 
-startServer();
+// ---------- Start server ----------
+const PORT = process.env.PORT || 5001;
+
+const startServer = async () => {
+  await initDB();
+  await seedAdmin();
+
+  // Initialise Socket.io after DB is ready
+  const io = new Server(server, {
+    cors: {
+      origin: 'http://localhost:3000',
+      methods: ['GET', 'POST'],
+    },
+  });
+
+  setIO(io);
+
+  io.on('connection', (socket) => {
+    console.log(`[Socket] connected: ${socket.id}`);
+
+    // Driver joins their personal room so HTTP routes can target them
+    socket.on('driver:join', ({ driverId }: { driverId: number }) => {
+      const room = `driver:${driverId}`;
+      socket.join(room);
+      console.log(`[Socket] ${socket.id} joined room ${room}`);
+    });
+
+    // Driver broadcasts their current location; relay to all clients
+    socket.on(
+      'driver:location',
+      (payload: { busId: number; lat: number; lng: number; routeId: number }) => {
+        io.emit('bus:moved', payload);
+      }
+    );
+
+    socket.on('disconnect', () => {
+      console.log(`[Socket] disconnected: ${socket.id}`);
+    });
+  });
+
+  server.listen(PORT, () => {
+    console.log(`🚌  Bus-Share backend running on http://localhost:${PORT}`);
+  });
+};
+
+startServer().catch((err) => {
+  console.error('Failed to start server:', err);
+  process.exit(1);
+});
