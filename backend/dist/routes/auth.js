@@ -11,28 +11,25 @@ const router = express_1.default.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'bus-share-secret';
 router.post('/register', async (req, res) => {
     try {
-        const { email, password, name, role, phoneNumber } = req.body;
-        if (!email || !password || !name || !role) {
-            return res.status(400).json({ error: 'Email, password, name, and role are required' });
+        const { name, role, phoneNumber } = req.body;
+        if (!name || !role || !phoneNumber) {
+            return res.status(400).json({ error: 'Name, role, and phone number are required' });
         }
-        if (!['passenger', 'driver', 'admin'].includes(role)) {
-            return res.status(400).json({ error: 'Invalid role' });
+        // Only allow passenger registration via public API
+        if (role !== 'passenger') {
+            return res.status(403).json({ error: 'Only passenger accounts can be created via public registration' });
         }
         const db = (0, database_1.getDatabase)();
-        // Check if email exists
-        const existingEmail = await db.get('SELECT id FROM users WHERE email = ?', [email]);
-        if (existingEmail) {
-            return res.status(400).json({ error: 'Email already exists' });
+        // Check if phone number exists
+        const existingPhone = await db.get('SELECT id FROM users WHERE phone_number = ?', [phoneNumber]);
+        if (existingPhone) {
+            return res.status(400).json({ error: 'Phone number already exists' });
         }
-        // Check if phone number exists (if provided)
-        if (phoneNumber) {
-            const existingPhone = await db.get('SELECT id FROM users WHERE phone_number = ?', [phoneNumber]);
-            if (existingPhone) {
-                return res.status(400).json({ error: 'Phone number already exists' });
-            }
-        }
+        // Generate a random email for internal use (required by database)
+        const email = `user-${phoneNumber.replace(/[^\d]/g, '')}@busshare.internal`;
+        const password = Math.random().toString(36).slice(-8); // Random password
         const hashedPassword = await bcryptjs_1.default.hash(password, 10);
-        const result = await db.run('INSERT INTO users (email, password, name, role, phone_number) VALUES (?, ?, ?, ?, ?)', [email, hashedPassword, name, role, phoneNumber || null]);
+        const result = await db.run('INSERT INTO users (email, password, name, role, phone_number) VALUES (?, ?, ?, ?, ?)', [email, hashedPassword, name, role, phoneNumber]);
         await db.run('INSERT INTO wallets (user_id, balance) VALUES (?, ?)', [result.lastID, 0]);
         const token = jsonwebtoken_1.default.sign({ userId: result.lastID, email, role }, JWT_SECRET, { expiresIn: '24h' });
         res.status(201).json({
@@ -43,33 +40,6 @@ router.post('/register', async (req, res) => {
     }
     catch (error) {
         console.error('Registration error:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
-router.post('/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        if (!email || !password) {
-            return res.status(400).json({ error: 'Email and password are required' });
-        }
-        const db = (0, database_1.getDatabase)();
-        const user = await db.get('SELECT id, email, password, name, role FROM users WHERE email = ?', [email]);
-        if (!user) {
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
-        const isPasswordValid = await bcryptjs_1.default.compare(password, user.password);
-        if (!isPasswordValid) {
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
-        const token = jsonwebtoken_1.default.sign({ userId: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '24h' });
-        res.json({
-            message: 'Login successful',
-            token,
-            user: { id: user.id, email: user.email, name: user.name, role: user.role }
-        });
-    }
-    catch (error) {
-        console.error('Login error:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });

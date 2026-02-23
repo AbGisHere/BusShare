@@ -30,14 +30,29 @@ const initializeDatabase = async () => {
       FOREIGN KEY (user_id) REFERENCES users (id)
     );
 
+    CREATE TABLE IF NOT EXISTS bus_routes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      route_name TEXT UNIQUE NOT NULL,
+      route_description TEXT,
+      start_point TEXT,
+      end_point TEXT,
+      stops TEXT, 
+      total_distance REAL,
+      estimated_time INTEGER, 
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
     CREATE TABLE IF NOT EXISTS buses (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       bus_number TEXT UNIQUE NOT NULL,
       driver_id INTEGER,
+      driver_name TEXT,
       current_lat REAL,
       current_lng REAL,
-      last_updated DATETIME,
-      FOREIGN KEY (driver_id) REFERENCES users (id)
+      last_updated TEXT,
+      route_id INTEGER,
+      FOREIGN KEY (driver_id) REFERENCES users (id),
+      FOREIGN KEY (route_id) REFERENCES bus_routes (id)
     );
 
     CREATE TABLE IF NOT EXISTS bookings (

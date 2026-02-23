@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const database_1 = require("../models/database");
 const router = express_1.default.Router();
 router.get('/users', async (req, res) => {
@@ -25,10 +26,12 @@ router.get('/buses', async (req, res) => {
     try {
         const db = (0, database_1.getDatabase)();
         const buses = await db.all(`
-      SELECT b.id, b.bus_number, b.driver_id, b.current_lat, b.current_lng, b.last_updated,
-             u.name as driver_name
+      SELECT b.id, b.bus_number, b.driver_id, b.driver_name, b.current_lat, b.current_lng, b.last_updated, b.route_id,
+             u.name as driver_name, u.phone_number as driver_phone,
+             r.route_name, r.start_point, r.end_point
       FROM buses b
       LEFT JOIN users u ON b.driver_id = u.id
+      LEFT JOIN bus_routes r ON b.route_id = r.id
       ORDER BY b.bus_number
     `);
         res.json(buses);
@@ -79,6 +82,145 @@ router.get('/stats', async (req, res) => {
     }
     catch (error) {
         console.error('Error fetching stats:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+router.post('/create-user', async (req, res) => {
+    try {
+        const { name, phoneNumber, role } = req.body;
+        if (!name || !phoneNumber || !role) {
+            return res.status(400).json({ error: 'Name, phone number, and role are required' });
+        }
+        if (!['driver', 'admin'].includes(role)) {
+            return res.status(400).json({ error: 'Admin can only create driver or admin accounts' });
+        }
+        const db = (0, database_1.getDatabase)();
+        // Check if phone number exists
+        const existingPhone = await db.get('SELECT id FROM users WHERE phone_number = ?', [phoneNumber]);
+        if (existingPhone) {
+            return res.status(400).json({ error: 'Phone number already exists' });
+        }
+        // Generate a random email for internal use (required by database)
+        const email = `user-${phoneNumber.replace(/[^\d]/g, '')}@busshare.internal`;
+        const password = Math.random().toString(36).slice(-8); // Random password
+        const hashedPassword = await bcryptjs_1.default.hash(password, 10);
+        const result = await db.run('INSERT INTO users (email, password, name, role, phone_number) VALUES (?, ?, ?, ?, ?)', [email, hashedPassword, name, role, phoneNumber]);
+        await db.run('INSERT INTO wallets (user_id, balance) VALUES (?, ?)', [result.lastID, 0]);
+        res.status(201).json({
+            message: `${role} account created successfully`,
+            user: { id: result.lastID, email, name, role, phoneNumber }
+        });
+    }
+    catch (error) {
+        console.error('Create user error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+router.post('/create-bus', async (req, res) => {
+    try {
+        const { busNumber, routeId } = req.body;
+        if (!busNumber) {
+            return res.status(400).json({ error: 'Bus number is required' });
+        }
+        const db = (0, database_1.getDatabase)();
+        // Check if bus number already exists
+        const existingBus = await db.get('SELECT id FROM buses WHERE bus_number = ?', [busNumber]);
+        if (existingBus) {
+            return res.status(400).json({ error: 'Bus number already exists' });
+        }
+        // Check if route exists (if provided)
+        if (routeId) {
+            const route = await db.get('SELECT id FROM bus_routes WHERE id = ?', [routeId]);
+            if (!route) {
+                return res.status(400).json({ error: 'Route not found' });
+            }
+        }
+        const result = await db.run('INSERT INTO buses (bus_number, route_id) VALUES (?, ?)', [busNumber, routeId || null]);
+        res.status(201).json({
+            message: 'Bus created successfully',
+            bus: { id: result.lastID, bus_number: busNumber, route_id: routeId }
+        });
+    }
+    catch (error) {
+        console.error('Create bus error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+router.post('/create-route', async (req, res) => {
+    try {
+        const { routeName, routeDescription, startPoint, endPoint, stops, totalDistance, estimatedTime } = req.body;
+        if (!routeName || !startPoint || !endPoint) {
+            return res.status(400).json({ error: 'Route name, start point, and end point are required' });
+        }
+        const db = (0, database_1.getDatabase)();
+        // Check if route name already exists
+        const existingRoute = await db.get('SELECT id FROM bus_routes WHERE route_name = ?', [routeName]);
+        if (existingRoute) {
+            return res.status(400).json({ error: 'Route name already exists' });
+        }
+        const stopsJson = JSON.stringify(stops || []);
+        const result = await db.run('INSERT INTO bus_routes (route_name, route_description, start_point, end_point, stops, total_distance, estimated_time) VALUES (?, ?, ?, ?, ?, ?, ?)', [routeName, routeDescription || null, startPoint, endPoint, stopsJson, totalDistance || null, estimatedTime || null]);
+        res.status(201).json({
+            message: 'Route created successfully',
+            route: {
+                id: result.lastID,
+                route_name: routeName,
+                route_description: routeDescription,
+                start_point: startPoint,
+                end_point: endPoint,
+                stops: stops,
+                total_distance: totalDistance,
+                estimated_time: estimatedTime
+            }
+        });
+    }
+    catch (error) {
+        console.error('Create route error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+router.put('/assign-route-to-bus', async (req, res) => {
+    try {
+        const { busId, routeId } = req.body;
+        if (!busId || !routeId) {
+            return res.status(400).json({ error: 'Bus ID and Route ID are required' });
+        }
+        const db = (0, database_1.getDatabase)();
+        // Check if bus exists
+        const bus = await db.get('SELECT id FROM buses WHERE id = ?', [busId]);
+        if (!bus) {
+            return res.status(404).json({ error: 'Bus not found' });
+        }
+        // Check if route exists
+        const route = await db.get('SELECT id FROM bus_routes WHERE id = ?', [routeId]);
+        if (!route) {
+            return res.status(404).json({ error: 'Route not found' });
+        }
+        await db.run('UPDATE buses SET route_id = ? WHERE id = ?', [routeId, busId]);
+        res.json({ message: 'Route assigned to bus successfully' });
+    }
+    catch (error) {
+        console.error('Assign route error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+router.get('/routes', async (req, res) => {
+    try {
+        const db = (0, database_1.getDatabase)();
+        const routes = await db.all(`
+      SELECT id, route_name, route_description, start_point, end_point, stops, total_distance, estimated_time, created_at
+      FROM bus_routes
+      ORDER BY created_at DESC
+    `);
+        // Parse stops from JSON
+        const routesWithParsedStops = routes.map(route => ({
+            ...route,
+            stops: route.stops ? JSON.parse(route.stops) : []
+        }));
+        res.json(routesWithParsedStops);
+    }
+    catch (error) {
+        console.error('Error fetching routes:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
