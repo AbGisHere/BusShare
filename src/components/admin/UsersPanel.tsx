@@ -15,7 +15,14 @@ export const UsersPanel: React.FC = () => {
 
   const load = () => {
     setLoading(true);
+<<<<<<< HEAD
     adminUsers().then(setUsers).catch(() => setError('Failed to load users')).finally(() => setLoading(false));
+=======
+    adminUsers()
+      .then(setUsers)
+      .catch(() => setError('Failed to load users'))
+      .finally(() => setLoading(false));
+>>>>>>> a4055be (V2.1.1 : Fronted changes)
   };
 
   useEffect(() => { load(); }, []);
@@ -26,6 +33,7 @@ export const UsersPanel: React.FC = () => {
     setCreating(true); setCreateError('');
     try {
       await adminCreateUser(form.name, form.phone, form.role);
+<<<<<<< HEAD
       setShowForm(false); setForm({ name: '', phone: '', role: 'driver' }); load();
     } catch (err: any) {
       setCreateError(err?.response?.data?.error || 'Failed to create user');
@@ -33,6 +41,23 @@ export const UsersPanel: React.FC = () => {
   };
 
   const roleBadge: Record<string, string> = { passenger: 'badge-sage', driver: 'badge-green', admin: 'badge-warn' };
+=======
+      setShowForm(false);
+      setForm({ name: '', phone: '', role: 'driver' });
+      load();
+    } catch (err: any) {
+      setCreateError(err?.response?.data?.error || 'Failed to create user');
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const roleBadge: Record<string, string> = {
+    passenger: 'badge-sage',
+    driver: 'badge-green',
+    admin: 'badge-warn',
+  };
+>>>>>>> a4055be (V2.1.1 : Fronted changes)
 
   return (
     <div>
@@ -48,11 +73,21 @@ export const UsersPanel: React.FC = () => {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
             <div>
               <label className="label">Name</label>
+<<<<<<< HEAD
               <input className="input" type="text" placeholder="Full name" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
             </div>
             <div>
               <label className="label">Phone</label>
               <input className="input" type="tel" placeholder="+91..." value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
+=======
+              <input className="input" type="text" placeholder="Full name" value={form.name}
+                onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+            </div>
+            <div>
+              <label className="label">Phone</label>
+              <input className="input" type="tel" placeholder="+91..." value={form.phone}
+                onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
+>>>>>>> a4055be (V2.1.1 : Fronted changes)
             </div>
           </div>
           <div style={{ marginBottom: 12 }}>
@@ -77,7 +112,17 @@ export const UsersPanel: React.FC = () => {
         <div className="card" style={{ overflow: 'hidden' }}>
           <table className="table">
             <thead>
+<<<<<<< HEAD
               <tr><th>Name</th><th>Phone</th><th>Role</th><th>Balance</th><th>Joined</th></tr>
+=======
+              <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Role</th>
+                <th>Balance</th>
+                <th>Joined</th>
+              </tr>
+>>>>>>> a4055be (V2.1.1 : Fronted changes)
             </thead>
             <tbody>
               {users.length === 0 ? (
@@ -89,7 +134,13 @@ export const UsersPanel: React.FC = () => {
                     <td style={{ fontFamily: 'monospace', fontSize: 13 }}>{u.phone}</td>
                     <td><span className={`badge ${roleBadge[u.role] || 'badge-sage'}`}>{u.role}</span></td>
                     <td>₹{u.walletBalance?.toFixed(2) ?? '0.00'}</td>
+<<<<<<< HEAD
                     <td style={{ color: '#52796F', fontSize: 12 }}>{u.created_at ? new Date(u.created_at).toLocaleDateString('en-IN') : '—'}</td>
+=======
+                    <td style={{ color: '#52796F', fontSize: 12 }}>
+                      {u.created_at ? new Date(u.created_at).toLocaleDateString('en-IN') : '—'}
+                    </td>
+>>>>>>> a4055be (V2.1.1 : Fronted changes)
                   </tr>
                 ))
               )}

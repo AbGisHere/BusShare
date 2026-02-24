@@ -2,7 +2,16 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HeroScene } from '../scene/HeroScene';
 
+<<<<<<< HEAD
 const RoleCard: React.FC<{ title: string; subtitle: string; icon: string; onClick: () => void }> = ({ title, subtitle, icon, onClick }) => (
+=======
+const RoleCard: React.FC<{
+  title: string;
+  subtitle: string;
+  icon: string;
+  onClick: () => void;
+}> = ({ title, subtitle, icon, onClick }) => (
+>>>>>>> a4055be (V2.1.1 : Fronted changes)
   <button
     onClick={onClick}
     style={{
@@ -41,9 +50,25 @@ export const LandingPage: React.FC = () => {
   return (
     <div className="page-full" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
       <HeroScene />
+<<<<<<< HEAD
       <div style={{ position: 'relative', zIndex: 10, textAlign: 'center', padding: '0 20px' }}>
         <div className="slide-up" style={{ marginBottom: 48 }}>
           <div style={{ fontSize: 56, fontWeight: 900, letterSpacing: '-0.04em', color: '#84A98C', lineHeight: 1, marginBottom: 12 }}>
+=======
+
+      {/* Overlay content */}
+      <div style={{ position: 'relative', zIndex: 10, textAlign: 'center', padding: '0 20px' }}>
+        {/* Logo / title */}
+        <div className="slide-up" style={{ marginBottom: 48 }}>
+          <div style={{
+            fontSize: 56,
+            fontWeight: 900,
+            letterSpacing: '-0.04em',
+            color: '#84A98C',
+            lineHeight: 1,
+            marginBottom: 12,
+          }}>
+>>>>>>> a4055be (V2.1.1 : Fronted changes)
             Bus-Share
           </div>
           <div style={{ fontSize: 16, color: 'rgba(132,169,140,0.7)', fontWeight: 400 }}>
@@ -51,12 +76,49 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
 
+<<<<<<< HEAD
         <div className="fade-in" style={{ display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 32, animationDelay: '0.15s', opacity: 0, animationFillMode: 'forwards' }}>
           <RoleCard title="Passenger" subtitle="Find buses, book rides, scan QR to board" icon="🚌" onClick={() => navigate('/login?role=passenger')} />
           <RoleCard title="Driver" subtitle="Start route, broadcast GPS, validate tickets" icon="🧑‍✈️" onClick={() => navigate('/login?role=driver')} />
         </div>
 
         <button className="btn btn-ghost" style={{ fontSize: 12, opacity: 0.55 }} onClick={() => navigate('/login?role=admin')}>
+=======
+        {/* Role cards */}
+        <div
+          className="fade-in"
+          style={{
+            display: 'flex',
+            gap: 20,
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+            marginBottom: 32,
+            animationDelay: '0.15s',
+            opacity: 0,
+            animationFillMode: 'forwards',
+          }}
+        >
+          <RoleCard
+            title="Passenger"
+            subtitle="Find buses, book rides, scan QR to board"
+            icon="🚌"
+            onClick={() => navigate('/login?role=passenger')}
+          />
+          <RoleCard
+            title="Driver"
+            subtitle="Start route, broadcast GPS, validate tickets"
+            icon="🧑‍✈️"
+            onClick={() => navigate('/login?role=driver')}
+          />
+        </div>
+
+        {/* Admin link */}
+        <button
+          className="btn btn-ghost"
+          style={{ fontSize: 12, opacity: 0.55 }}
+          onClick={() => navigate('/login?role=admin')}
+        >
+>>>>>>> a4055be (V2.1.1 : Fronted changes)
           Admin Portal
         </button>
       </div>

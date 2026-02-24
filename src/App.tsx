@@ -1,6 +1,9 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+<<<<<<< HEAD
 import { AuthProvider } from './hooks/AuthProvider';
+=======
+>>>>>>> a4055be (V2.1.1 : Fronted changes)
 import { useAuth } from './hooks/useAuth';
 import { ProtectedRoute } from './components/shared/ProtectedRoute';
 
@@ -11,9 +14,12 @@ import { PassengerDashboard } from './pages/PassengerDashboard';
 import { DriverDashboard } from './pages/DriverDashboard';
 import { AdminDashboard } from './pages/AdminDashboard';
 
+<<<<<<< HEAD
 const roleDest = (role: string) =>
   role === 'driver' ? '/driver' : role === 'admin' ? '/admin' : '/passenger';
 
+=======
+>>>>>>> a4055be (V2.1.1 : Fronted changes)
 const AppRoutes: React.FC = () => {
   const { user, loading } = useAuth();
 
@@ -24,6 +30,7 @@ const AppRoutes: React.FC = () => {
         path="/"
         element={
           !loading && user
+<<<<<<< HEAD
             ? <Navigate to={roleDest(user.role)} replace />
             : <LandingPage />
         }
@@ -44,6 +51,14 @@ const AppRoutes: React.FC = () => {
             : <RegisterPage />
         }
       />
+=======
+            ? <Navigate to={user.role === 'driver' ? '/driver' : user.role === 'admin' ? '/admin' : '/passenger'} replace />
+            : <LandingPage />
+        }
+      />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+>>>>>>> a4055be (V2.1.1 : Fronted changes)
 
       {/* Protected */}
       <Route
@@ -71,6 +86,10 @@ const AppRoutes: React.FC = () => {
         }
       />
 
+<<<<<<< HEAD
+=======
+      {/* Catch-all */}
+>>>>>>> a4055be (V2.1.1 : Fronted changes)
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
@@ -78,9 +97,13 @@ const AppRoutes: React.FC = () => {
 
 const App: React.FC = () => (
   <BrowserRouter>
+<<<<<<< HEAD
     <AuthProvider>
       <AppRoutes />
     </AuthProvider>
+=======
+    <AppRoutes />
+>>>>>>> a4055be (V2.1.1 : Fronted changes)
   </BrowserRouter>
 );
 
