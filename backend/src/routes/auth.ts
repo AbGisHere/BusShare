@@ -22,15 +22,7 @@ router.post('/send-otp', async (req: Request, res: Response): Promise<void> => {
     [phone, code, expiresAt]
   );
 
-  const response: { message: string; otp?: string } = {
-    message: 'OTP sent successfully',
-  };
-
-  if (process.env.NODE_ENV !== 'production') {
-    response.otp = code;
-  }
-
-  res.json(response);
+  res.json({ message: 'OTP sent successfully', otp: code });
 });
 
 // POST /api/auth/verify-otp
@@ -106,15 +98,7 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
     [phone, code, expiresAt]
   );
 
-  const response: { message: string; otp?: string } = {
-    message: 'Registration successful. OTP sent.',
-  };
-
-  if (process.env.NODE_ENV !== 'production') {
-    response.otp = code;
-  }
-
-  res.status(201).json(response);
+  res.status(201).json({ message: 'Registration successful. OTP sent.', otp: code });
 });
 
 export default router;
