@@ -4,6 +4,13 @@ A real-time campus bus booking platform. Passengers book ₹20 rides and get a Q
 
 ![React](https://img.shields.io/badge/React-19-blue) ![TypeScript](https://img.shields.io/badge/TypeScript-4.9-blue) ![Three.js](https://img.shields.io/badge/Three.js-0.177-orange) ![Node.js](https://img.shields.io/badge/Node.js-Express-green) ![License](https://img.shields.io/badge/license-MIT-green)
 
+**Live demo:** [bus-share.vercel.app](https://bus-share.vercel.app)
+
+| Service | URL |
+|---------|-----|
+| Frontend | https://bus-share.vercel.app |
+| Backend API | https://busshare-backend.onrender.com |
+
 ---
 
 ## Features
@@ -169,16 +176,16 @@ Login at `/login?role=admin`. Four tabs are available:
 
 ## URL Reference
 
-| URL | Purpose |
-|-----|---------|
-| `http://localhost:3000/` | Landing page |
-| `http://localhost:3000/login` | Passenger login (default) |
-| `http://localhost:3000/login?role=driver` | Driver login |
-| `http://localhost:3000/login?role=admin` | Admin login |
-| `http://localhost:3000/register` | Passenger self-registration |
-| `http://localhost:3000/passenger` | Passenger dashboard (protected) |
-| `http://localhost:3000/driver` | Driver dashboard (protected) |
-| `http://localhost:3000/admin` | Admin dashboard (protected) |
+| Path | Purpose |
+|------|---------|
+| `/` | Landing page |
+| `/login` | Passenger login (default) |
+| `/login?role=driver` | Driver login |
+| `/login?role=admin` | Admin login |
+| `/register` | Passenger self-registration |
+| `/passenger` | Passenger dashboard (protected) |
+| `/driver` | Driver dashboard (protected) |
+| `/admin` | Admin dashboard (protected) |
 
 ---
 
@@ -216,24 +223,59 @@ Bus-Share/
 
 ---
 
-## Environment Variables
+## Deployment
 
-Backend (optional — defaults shown):
+The app is split across two platforms:
+
+| Layer | Platform | Notes |
+|-------|----------|-------|
+| Frontend | [Vercel](https://vercel.com) | Static React build, `vercel.json` handles SPA routing |
+| Backend | [Render](https://render.com) | Node.js web service, Root Directory: `backend` |
+
+### Render build settings
+
+| Field | Value |
+|-------|-------|
+| Build Command | `npm install && npm run build` |
+| Start Command | `node dist/index.js` |
+
+### Environment Variables
+
+**Backend** (set in Render dashboard):
+
+```env
+NODE_ENV=production
+JWT_SECRET=<strong random string>
+FRONTEND_URL=https://bus-share.vercel.app
+```
+
+**Frontend** (set in Vercel dashboard):
+
+```env
+REACT_APP_API_URL=https://busshare-backend.onrender.com
+REACT_APP_SOCKET_URL=https://busshare-backend.onrender.com
+```
+
+### Local development
+
+Backend (`backend/.env`):
 
 ```env
 PORT=5001
 JWT_SECRET=busshare_secret_2024
 NODE_ENV=development
+FRONTEND_URL=http://localhost:3000
 ```
 
-> In `NODE_ENV=production`, OTPs are **not** returned in the API response (SMS integration required).
-
-Frontend (optional — in `frontend/.env`):
+Frontend (`frontend/.env` at repo root):
 
 ```env
 REACT_APP_API_URL=http://localhost:5001
+REACT_APP_SOCKET_URL=http://localhost:5001
 GENERATE_SOURCEMAP=false
 ```
+
+> In `NODE_ENV=development`, the generated OTP is returned directly in the API response and shown on the login form. In production no OTP is surfaced (SMS integration would be required for a real deployment).
 
 ---
 
