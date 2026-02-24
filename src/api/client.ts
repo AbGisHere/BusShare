@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { Bus, Route, Booking, DriverStats, AdminStats, ScanResult, User } from '../types';
 
-const BASE = 'http://localhost:5001';
+const BASE = process.env.REACT_APP_API_URL || 'http://localhost:5001';
 
 export const api = axios.create({ baseURL: BASE, headers: { 'Content-Type': 'application/json' } });
 
