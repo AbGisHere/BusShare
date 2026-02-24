@@ -5,10 +5,6 @@ const BASE = 'http://localhost:5001';
 
 export const api = axios.create({ baseURL: BASE, headers: { 'Content-Type': 'application/json' } });
 
-<<<<<<< HEAD
-=======
-// Attach JWT from localStorage on every request
->>>>>>> a4055be (V2.1.1 : Fronted changes)
 api.interceptors.request.use(cfg => {
   const token = localStorage.getItem('token');
   if (token && cfg.headers) cfg.headers.Authorization = `Bearer ${token}`;

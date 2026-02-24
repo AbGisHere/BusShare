@@ -12,17 +12,7 @@ interface Props {
 export const ProtectedRoute: React.FC<Props> = ({ user, loading, allowedRoles, children }) => {
   if (loading) {
     return (
-<<<<<<< HEAD
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#01161E' }}>
-=======
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: '#01161E',
-      }}>
->>>>>>> a4055be (V2.1.1 : Fronted changes)
         <span className="spinner" style={{ width: 32, height: 32, borderWidth: 3 }} />
       </div>
     );

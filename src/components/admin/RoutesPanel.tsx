@@ -13,14 +13,7 @@ export const RoutesPanel: React.FC = () => {
 
   const load = () => {
     setLoading(true);
-<<<<<<< HEAD
     adminRoutes().then(setRoutes).catch(() => setError('Failed to load routes')).finally(() => setLoading(false));
-=======
-    adminRoutes()
-      .then(setRoutes)
-      .catch(() => setError('Failed to load routes'))
-      .finally(() => setLoading(false));
->>>>>>> a4055be (V2.1.1 : Fronted changes)
   };
 
   useEffect(() => { load(); }, []);
@@ -33,12 +26,7 @@ export const RoutesPanel: React.FC = () => {
     setCreating(true); setCreateError('');
     try {
       await adminCreateRoute(form.name.trim(), stopsList, form.description.trim());
-<<<<<<< HEAD
       setShowForm(false); setForm({ name: '', stops: '', description: '' }); load();
-=======
-      setShowForm(false); setForm({ name: '', stops: '', description: '' });
-      load();
->>>>>>> a4055be (V2.1.1 : Fronted changes)
     } catch (err: any) {
       setCreateError(err?.response?.data?.error || 'Failed to create route');
     } finally { setCreating(false); }
@@ -46,14 +34,7 @@ export const RoutesPanel: React.FC = () => {
 
   const handleDelete = async (id: number, name: string) => {
     if (!window.confirm(`Delete route "${name}"? This cannot be undone.`)) return;
-<<<<<<< HEAD
     try { await adminDeleteRoute(id); load(); } catch { /* ignore */ }
-=======
-    try {
-      await adminDeleteRoute(id);
-      load();
-    } catch { /* ignore */ }
->>>>>>> a4055be (V2.1.1 : Fronted changes)
   };
 
   return (
@@ -69,7 +50,6 @@ export const RoutesPanel: React.FC = () => {
         <form onSubmit={handleCreate} className="card" style={{ padding: 20, marginBottom: 20 }}>
           <div className="form-group">
             <label className="label">Route Name</label>
-<<<<<<< HEAD
             <input className="input" type="text" placeholder="e.g. Main Gate → Library" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
           </div>
           <div className="form-group">
@@ -79,20 +59,6 @@ export const RoutesPanel: React.FC = () => {
           <div className="form-group">
             <label className="label">Description (optional)</label>
             <input className="input" type="text" placeholder="Short description" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
-=======
-            <input className="input" type="text" placeholder="e.g. Main Gate → Library"
-              value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
-          </div>
-          <div className="form-group">
-            <label className="label">Stops (comma-separated)</label>
-            <input className="input" type="text" placeholder="Main Gate, Hostel A, Library, Sports Complex"
-              value={form.stops} onChange={e => setForm(f => ({ ...f, stops: e.target.value }))} />
-          </div>
-          <div className="form-group">
-            <label className="label">Description (optional)</label>
-            <input className="input" type="text" placeholder="Short description"
-              value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
->>>>>>> a4055be (V2.1.1 : Fronted changes)
           </div>
           {createError && <div className="error-text">{createError}</div>}
           <button className="btn btn-primary" type="submit" disabled={creating} style={{ marginTop: 4 }}>
@@ -108,7 +74,6 @@ export const RoutesPanel: React.FC = () => {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {routes.length === 0 ? (
-<<<<<<< HEAD
             <div style={{ textAlign: 'center', padding: '32px', color: '#52796F', border: '1px dashed rgba(132,169,140,0.2)', borderRadius: 10 }}>No routes created yet</div>
           ) : routes.map(route => (
             <div key={route.id} className="card" style={{ padding: '16px 20px' }}>
@@ -128,42 +93,6 @@ export const RoutesPanel: React.FC = () => {
               </div>
             </div>
           ))}
-=======
-            <div style={{ textAlign: 'center', padding: '32px', color: '#52796F', border: '1px dashed rgba(132,169,140,0.2)', borderRadius: 10 }}>
-              No routes created yet
-            </div>
-          ) : (
-            routes.map(route => (
-              <div key={route.id} className="card" style={{ padding: '16px 20px' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, fontSize: 15, color: '#CAD2C5', marginBottom: 4 }}>{route.name}</div>
-                    {route.description && (
-                      <div style={{ fontSize: 12, color: '#52796F', marginBottom: 8 }}>{route.description}</div>
-                    )}
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                      {route.stops.map((stop, i) => (
-                        <span key={i} style={{
-                          padding: '3px 10px',
-                          background: 'rgba(132,169,140,0.08)',
-                          border: '1px solid rgba(132,169,140,0.18)',
-                          borderRadius: 20,
-                          fontSize: 11, color: '#CAD2C5',
-                        }}>
-                          {i + 1}. {stop}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <button className="btn btn-danger" style={{ fontSize: 12, padding: '6px 12px', flexShrink: 0 }}
-                    onClick={() => handleDelete(route.id, route.name)}>
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
->>>>>>> a4055be (V2.1.1 : Fronted changes)
         </div>
       )}
     </div>

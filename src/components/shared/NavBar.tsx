@@ -15,13 +15,7 @@ const roleColor: Record<string, string> = {
 export const NavBar: React.FC<NavBarProps> = ({ user, onLogout }) => (
   <nav style={{
     position: 'fixed',
-<<<<<<< HEAD
     top: 0, left: 0, right: 0,
-=======
-    top: 0,
-    left: 0,
-    right: 0,
->>>>>>> a4055be (V2.1.1 : Fronted changes)
     height: 56,
     background: 'rgba(1,22,30,0.92)',
     borderBottom: '1px solid rgba(132,169,140,0.2)',
@@ -34,27 +28,11 @@ export const NavBar: React.FC<NavBarProps> = ({ user, onLogout }) => (
     zIndex: 500,
   }}>
     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-<<<<<<< HEAD
       <span style={{ fontSize: 20, fontWeight: 800, color: '#84A98C', letterSpacing: '-0.02em' }}>
         Bus-Share
       </span>
       <span className={`badge ${roleColor[user.role] || 'badge-sage'}`}>{user.role}</span>
     </div>
-=======
-      <span style={{
-        fontSize: 20,
-        fontWeight: 800,
-        color: '#84A98C',
-        letterSpacing: '-0.02em',
-      }}>
-        Bus-Share
-      </span>
-      <span className={`badge ${roleColor[user.role] || 'badge-sage'}`}>
-        {user.role}
-      </span>
-    </div>
-
->>>>>>> a4055be (V2.1.1 : Fronted changes)
     <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
       <div style={{ textAlign: 'right' }}>
         <div style={{ fontSize: 14, fontWeight: 600, color: '#e8f4f0' }}>{user.name}</div>

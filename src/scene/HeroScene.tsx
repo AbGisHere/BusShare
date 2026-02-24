@@ -93,36 +93,20 @@ function BusIcon() {
   return (
     <Float speed={0.8} floatIntensity={1.2}>
       <group ref={ref} position={[0, 0, -2]}>
-<<<<<<< HEAD
-=======
-        {/* Body */}
->>>>>>> a4055be (V2.1.1 : Fronted changes)
         <mesh position={[0, 0.3, 0]}>
           <boxGeometry args={[3.2, 1.4, 1.4]} />
           <meshStandardMaterial color={SAGE} emissive={SAGE} emissiveIntensity={0.2} transparent opacity={0.7} />
         </mesh>
-<<<<<<< HEAD
-=======
-        {/* Roof */}
->>>>>>> a4055be (V2.1.1 : Fronted changes)
         <mesh position={[0, 1.15, 0]}>
           <boxGeometry args={[3.0, 0.35, 1.3]} />
           <meshStandardMaterial color={SAGE_DARK} emissive={SAGE_DARK} emissiveIntensity={0.15} transparent opacity={0.7} />
         </mesh>
-<<<<<<< HEAD
-=======
-        {/* Windows */}
->>>>>>> a4055be (V2.1.1 : Fronted changes)
         {[-1.0, 0, 1.0].map((x, i) => (
           <mesh key={i} position={[x, 0.45, 0.72]}>
             <boxGeometry args={[0.65, 0.55, 0.05]} />
             <meshStandardMaterial color="#CAD2C5" emissive="#CAD2C5" emissiveIntensity={0.6} transparent opacity={0.8} />
           </mesh>
         ))}
-<<<<<<< HEAD
-=======
-        {/* Wheels */}
->>>>>>> a4055be (V2.1.1 : Fronted changes)
         {[-1.1, 1.1].map((x, i) => (
           <mesh key={i} position={[x, -0.45, 0]} rotation={[Math.PI / 2, 0, 0]}>
             <cylinderGeometry args={[0.35, 0.35, 1.5, 12]} />
