@@ -17,9 +17,11 @@ const app = express();
 const server = http.createServer(app);
 
 // ---------- Express middleware ----------
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+
 app.use(
   cors({
-    origin: 'http://localhost:3000',
+    origin: FRONTEND_URL,
     credentials: true,
   })
 );
@@ -64,7 +66,7 @@ const startServer = async () => {
   // Initialise Socket.io after DB is ready
   const io = new Server(server, {
     cors: {
-      origin: 'http://localhost:3000',
+      origin: FRONTEND_URL,
       methods: ['GET', 'POST'],
     },
   });
